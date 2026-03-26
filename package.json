@@ -1,0 +1,12 @@
+{
+  "name": "rado-ooty-platform",
+  "version": "1.0.0",
+  "description": "Quick commerce platform for Ooty fresh produce",
+  "scripts": {
+    "start": "node api/products.js",
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "mongoose": "^7.8.9"
+  }
+}
