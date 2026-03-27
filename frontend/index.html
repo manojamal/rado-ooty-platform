@@ -5,32 +5,135 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rado ஊT - Fresh from Ooty Hills</title>
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <div class="logo">
+            <div class="logo" onclick="location.href='/'">
                 <span>🌿</span>
                 <span>Rado ஊT</span>
                 <span>Farm Fresh · Ooty Hills</span>
             </div>
-            <button class="cart-icon" id="cartIcon">🛒 <span id="cartCount">0</span></button>
+            <div class="nav-links">
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Search products...">
+                    <i class="fas fa-search"></i>
+                </div>
+                <button class="cart-icon" id="cartIcon">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="cartCount">0</span>
+                </button>
+                <div id="userMenu"></div>
+                <button class="menu-toggle" id="menuToggle">☰</button>
+            </div>
         </div>
     </nav>
 
-    <div class="container">
-        <div class="products-grid" id="productsGrid">
-            <div class="loading">Loading fresh products...</div>
-        </div>
-        
-        <div class="cart-sidebar" id="cartSidebar">
-            <h3>Your Cart</h3>
-            <div id="cartItems"></div>
-            <div class="cart-total" id="cartTotal"></div>
-            <button id="checkoutBtn" class="checkout-btn">Checkout</button>
+    <div class="hero">
+        <div class="hero-content">
+            <h1>🌿 Ooty Farms to Your Door!</h1>
+            <p>Strawberries, blueberries & seasonal produce — harvested fresh daily</p>
+            <div class="hero-stats">
+                <div class="stat">
+                    <i class="fas fa-truck"></i>
+                    <span>30-45 min delivery</span>
+                </div>
+                <div class="stat">
+                    <i class="fas fa-leaf"></i>
+                    <span>Eco-friendly packaging</span>
+                </div>
+                <div class="stat">
+                    <i class="fas fa-star"></i>
+                    <span>4.8 ★ Customer rating</span>
+                </div>
+            </div>
         </div>
     </div>
 
+    <div class="main-container">
+        <aside class="sidebar" id="sidebar">
+            <div class="cart-header">
+                <h3><i class="fas fa-shopping-cart"></i> Your Cart</h3>
+                <button class="close-cart" id="closeCart">×</button>
+            </div>
+            <div id="cart-content"></div>
+        </aside>
+
+        <main class="products-container">
+            <div class="categories">
+                <button class="category-btn active" data-category="all">All Products</button>
+                <button class="category-btn" data-category="Fresh Produce">🌾 Fresh Produce</button>
+                <button class="category-btn" data-category="Dairy">🥛 Dairy</button>
+                <button class="category-btn" data-category="Bundle Deals">🎁 Bundle Deals</button>
+            </div>
+            
+            <div id="productsGrid" class="products-grid"></div>
+            
+            <div class="load-more" id="loadMore" style="display: none;">
+                <button class="load-more-btn">Load More Products</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="zoneModal" class="modal">
+        <div class="modal-content">
+            <h2>📍 Select Your Delivery Area</h2>
+            <div class="zone-options">
+                <div class="zone-option" data-zone="Zone 1">
+                    <strong>🏪 Ooty Town</strong>
+                    <span>30–45 min · Free above ₹199</span>
+                </div>
+                <div class="zone-option" data-zone="Zone 2">
+                    <strong>🍃 Coonoor & Kotagiri</strong>
+                    <span>45–75 min · ₹30 fee</span>
+                </div>
+                <div class="zone-option" data-zone="Zone 3">
+                    <strong>🚵 Gudalur & Outskirts</strong>
+                    <span>75–120 min · ₹60 fee</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="checkoutModal" class="modal">
+        <div class="modal-content checkout-modal">
+            <h2>📦 Complete Your Order</h2>
+            <form id="checkoutForm">
+                <div id="checkoutUserInfo"></div>
+                <input type="text" placeholder="Full Name" required id="customerName">
+                <input type="tel" placeholder="Phone Number" required id="customerPhone">
+                <textarea placeholder="Delivery Address" required id="customerAddress"></textarea>
+                <input type="text" placeholder="Landmark (optional)" id="customerLandmark">
+                <select required id="deliverySlot">
+                    <option value="">Select Delivery Slot</option>
+                    <option value="7-10 AM">🌅 7–10 AM (Morning Fresh)</option>
+                    <option value="4-7 PM">🌇 4–7 PM (Evening)</option>
+                    <option value="Express">⚡ Express (30–45 min)</option>
+                </select>
+                <div class="coupon-section">
+                    <input type="text" placeholder="Coupon Code" id="couponCode">
+                    <button type="button" onclick="applyCoupon()">Apply</button>
+                </div>
+                <div class="order-summary" id="orderSummary"></div>
+                <button type="submit" class="checkout-btn">Place Order 🚚</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="trackingModal" class="modal">
+        <div class="modal-content tracking-modal">
+            <h2>🚚 Track Your Order</h2>
+            <div id="trackingContent"></div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
     <script src="/js/app.js"></script>
+    <script src="/js/cart.js"></script>
+    <script src="/js/checkout.js"></script>
+    <script src="/js/user.js"></script>
 </body>
 </html>
