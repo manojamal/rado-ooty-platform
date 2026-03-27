@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Rado ஊT</title>
+    <title>Advanced Admin Dashboard - Rado ஊT</title>
     <link rel="stylesheet" href="/css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="admin-container">
@@ -14,10 +16,12 @@
             <div class="logo">
                 <span>🌿</span>
                 <span>Rado ஊT Admin</span>
+                <span class="version">v3.0</span>
             </div>
             <nav class="admin-nav">
                 <button class="nav-item active" data-section="dashboard">
-                    <i class="fas fa-dashboard"></i> Dashboard
+                    <i class="fas fa-chart-line"></i> Dashboard
+                    <span class="badge" id="liveBadge">LIVE</span>
                 </button>
                 <button class="nav-item" data-section="products">
                     <i class="fas fa-box"></i> Products
@@ -28,20 +32,36 @@
                 <button class="nav-item" data-section="users">
                     <i class="fas fa-users"></i> Users
                 </button>
+                <button class="nav-item" data-section="delivery">
+                    <i class="fas fa-truck"></i> Delivery Partners
+                </button>
+                <button class="nav-item" data-section="tickets">
+                    <i class="fas fa-ticket-alt"></i> Support Tickets
+                </button>
+                <button class="nav-item" data-section="refunds">
+                    <i class="fas fa-undo-alt"></i> Returns & Refunds
+                </button>
                 <button class="nav-item" data-section="analytics">
-                    <i class="fas fa-chart-line"></i> Analytics
+                    <i class="fas fa-chart-bar"></i> Analytics
                 </button>
-                <button class="nav-item" data-section="inventory">
-                    <i class="fas fa-warehouse"></i> Inventory
+                <button class="nav-item" data-section="reports">
+                    <i class="fas fa-file-alt"></i> Reports
                 </button>
-                <button class="nav-item" data-section="coupons">
-                    <i class="fas fa-tag"></i> Coupons
+                <button class="nav-item" data-section="marketing">
+                    <i class="fas fa-bullhorn"></i> Marketing
                 </button>
                 <button class="nav-item" data-section="settings">
                     <i class="fas fa-cog"></i> Settings
                 </button>
+                <button class="nav-item" data-section="logs">
+                    <i class="fas fa-history"></i> Activity Logs
+                </button>
             </nav>
             <div class="admin-footer">
+                <div class="admin-user">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="adminName">Admin</span>
+                </div>
                 <button onclick="logout()" class="logout-btn">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </button>
@@ -52,13 +72,24 @@
         <main class="admin-main">
             <!-- Dashboard Section -->
             <div id="dashboard" class="admin-section active">
-                <h1>Dashboard</h1>
+                <div class="section-header">
+                    <h1><i class="fas fa-chart-line"></i> Dashboard Overview</h1>
+                    <div class="date-range">
+                        <button onclick="setDateRange('today')">Today</button>
+                        <button onclick="setDateRange('week')">This Week</button>
+                        <button onclick="setDateRange('month')">This Month</button>
+                        <button onclick="setDateRange('year')">This Year</button>
+                    </div>
+                </div>
+                
+                <!-- Stats Grid -->
                 <div class="stats-grid" id="statsGrid">
                     <div class="stat-card">
                         <div class="stat-icon">📦</div>
                         <div class="stat-info">
                             <h3 id="totalOrders">0</h3>
                             <p>Total Orders</p>
+                            <span class="trend positive" id="ordersTrend">+0%</span>
                         </div>
                     </div>
                     <div class="stat-card">
@@ -66,32 +97,55 @@
                         <div class="stat-info">
                             <h3 id="totalRevenue">₹0</h3>
                             <p>Total Revenue</p>
+                            <span class="trend positive" id="revenueTrend">+0%</span>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">👥</div>
                         <div class="stat-info">
                             <h3 id="totalUsers">0</h3>
-                            <p>Total Users</p>
+                            <p>Active Users</p>
+                            <span class="trend" id="usersTrend">+0</span>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">📊</div>
+                        <div class="stat-icon">⭐</div>
                         <div class="stat-info">
-                            <h3 id="totalProducts">0</h3>
-                            <p>Total Products</p>
+                            <h3 id="avgRating">4.8</h3>
+                            <p>Avg Rating</p>
+                            <span class="trend positive">★ ★ ★ ★ ★</span>
                         </div>
                     </div>
                 </div>
-                
+
+                <!-- Charts Row -->
                 <div class="charts-row">
+                    <div class="chart-card">
+                        <h3>Revenue Trend</h3>
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Order Status Distribution</h3>
+                        <canvas id="orderStatusChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="charts-row">
+                    <div class="chart-card">
+                        <h3>Top Selling Products</h3>
+                        <div id="topProductsList"></div>
+                    </div>
                     <div class="chart-card">
                         <h3>Recent Orders</h3>
                         <div id="recentOrdersList"></div>
                     </div>
-                    <div class="chart-card">
-                        <h3>Top Products</h3>
-                        <div id="topProductsList"></div>
+                </div>
+
+                <div class="alert-card info">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                        <strong>System Status:</strong> All systems operational
+                        <span id="lastUpdate">Last updated: Just now</span>
                     </div>
                 </div>
             </div>
@@ -99,25 +153,61 @@
             <!-- Products Section -->
             <div id="products" class="admin-section">
                 <div class="section-header">
-                    <h1>Product Management</h1>
-                    <button onclick="showAddProductModal()" class="btn-primary">
-                        <i class="fas fa-plus"></i> Add Product
-                    </button>
+                    <h1><i class="fas fa-box"></i> Product Management</h1>
+                    <div class="action-buttons">
+                        <button onclick="exportProducts()" class="btn-secondary">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                        <button onclick="importProducts()" class="btn-secondary">
+                            <i class="fas fa-upload"></i> Import
+                        </button>
+                        <button onclick="showAddProductModal()" class="btn-primary">
+                            <i class="fas fa-plus"></i> Add Product
+                        </button>
+                    </div>
                 </div>
+                
+                <div class="filters">
+                    <input type="text" id="productSearch" placeholder="Search products..." onkeyup="filterProducts()">
+                    <select id="categoryFilter" onchange="filterProducts()">
+                        <option value="">All Categories</option>
+                        <option value="Fresh Produce">Fresh Produce</option>
+                        <option value="Dairy">Dairy</option>
+                        <option value="Bundle Deals">Bundle Deals</option>
+                    </select>
+                    <select id="stockFilter" onchange="filterProducts()">
+                        <option value="">All Stock</option>
+                        <option value="low">Low Stock (<20)</option>
+                        <option value="out">Out of Stock</option>
+                        <option value="in">In Stock</option>
+                    </select>
+                </div>
+                
                 <div class="products-table-container">
                     <table class="admin-table" id="productsTable">
                         <thead>
-                            <tr><th>Image</th><th>Name</th><th>Price</th><th>Stock</th><th>Category</th><th>Actions</th></tr>
+                            <tr>
+                                <th>Image</th><th>Name</th><th>Price</th><th>Discount</th><th>Stock</th>
+                                <th>Category</th><th>Sales</th><th>Actions</th>
+                            </tr>
                         </thead>
                         <tbody id="productsTableBody"></tbody>
                     </table>
                 </div>
+                <div class="pagination" id="productsPagination"></div>
             </div>
 
             <!-- Orders Section -->
             <div id="orders" class="admin-section">
                 <div class="section-header">
-                    <h1>Order Management</h1>
+                    <h1><i class="fas fa-shopping-cart"></i> Order Management</h1>
+                    <button onclick="exportOrders()" class="btn-secondary">
+                        <i class="fas fa-download"></i> Export Orders
+                    </button>
+                </div>
+                
+                <div class="filters">
+                    <input type="text" id="orderSearch" placeholder="Search by order # or customer..." onkeyup="filterOrders()">
                     <select id="orderStatusFilter" onchange="filterOrders()">
                         <option value="all">All Orders</option>
                         <option value="pending">Pending</option>
@@ -125,69 +215,187 @@
                         <option value="preparing">Preparing</option>
                         <option value="out-for-delivery">Out for Delivery</option>
                         <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
                     </select>
+                    <input type="date" id="orderDateFrom" placeholder="From Date">
+                    <input type="date" id="orderDateTo" placeholder="To Date">
+                    <button onclick="filterOrders()" class="btn-primary">Apply Filters</button>
                 </div>
+                
                 <div class="orders-list" id="ordersList"></div>
+                <div class="pagination" id="ordersPagination"></div>
             </div>
 
             <!-- Users Section -->
             <div id="users" class="admin-section">
-                <h1>User Management</h1>
+                <div class="section-header">
+                    <h1><i class="fas fa-users"></i> User Management</h1>
+                    <button onclick="exportUsers()" class="btn-secondary">
+                        <i class="fas fa-download"></i> Export Users
+                    </button>
+                </div>
+                
+                <div class="filters">
+                    <input type="text" id="userSearch" placeholder="Search by name or email..." onkeyup="filterUsers()">
+                    <select id="userSort" onchange="filterUsers()">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="mostOrders">Most Orders</option>
+                        <option value="highestSpent">Highest Spent</option>
+                    </select>
+                </div>
+                
                 <div class="users-list" id="usersList"></div>
+                <div class="pagination" id="usersPagination"></div>
+            </div>
+
+            <!-- Delivery Partners Section -->
+            <div id="delivery" class="admin-section">
+                <div class="section-header">
+                    <h1><i class="fas fa-truck"></i> Delivery Partners</h1>
+                    <button onclick="showAddPartnerModal()" class="btn-primary">
+                        <i class="fas fa-plus"></i> Add Partner
+                    </button>
+                </div>
+                <div id="deliveryPartnersList"></div>
+            </div>
+
+            <!-- Support Tickets Section -->
+            <div id="tickets" class="admin-section">
+                <div class="section-header">
+                    <h1><i class="fas fa-ticket-alt"></i> Support Tickets</h1>
+                    <select id="ticketStatusFilter" onchange="filterTickets()">
+                        <option value="all">All Tickets</option>
+                        <option value="open">Open</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="resolved">Resolved</option>
+                    </select>
+                </div>
+                <div id="ticketsList"></div>
+            </div>
+
+            <!-- Refunds Section -->
+            <div id="refunds" class="admin-section">
+                <div class="section-header">
+                    <h1><i class="fas fa-undo-alt"></i> Returns & Refunds</h1>
+                    <button onclick="processPendingRefunds()" class="btn-primary">
+                        <i class="fas fa-sync"></i> Process Pending
+                    </button>
+                </div>
+                <div id="refundsList"></div>
             </div>
 
             <!-- Analytics Section -->
             <div id="analytics" class="admin-section">
-                <h1>Analytics</h1>
+                <h1><i class="fas fa-chart-bar"></i> Advanced Analytics</h1>
                 <div class="analytics-grid">
-                    <div class="analytics-card">
-                        <h3>Sales Overview</h3>
-                        <canvas id="salesChart"></canvas>
+                    <div class="analytics-card full-width">
+                        <h3>Sales Performance</h3>
+                        <canvas id="salesPerformanceChart"></canvas>
                     </div>
                     <div class="analytics-card">
                         <h3>Category Performance</h3>
-                        <canvas id="categoryChart"></canvas>
+                        <canvas id="categoryPerformanceChart"></canvas>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>Hourly Sales Pattern</h3>
+                        <canvas id="hourlySalesChart"></canvas>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>Customer Retention</h3>
+                        <canvas id="retentionChart"></canvas>
                     </div>
                 </div>
             </div>
 
-            <!-- Inventory Section -->
-            <div id="inventory" class="admin-section">
-                <h1>Inventory Management</h1>
-                <div class="inventory-stats">
-                    <div class="alert-card low-stock">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <span id="lowStockCount">0</span> products low in stock
+            <!-- Reports Section -->
+            <div id="reports" class="admin-section">
+                <h1><i class="fas fa-file-alt"></i> Generate Reports</h1>
+                <div class="reports-grid">
+                    <div class="report-card" onclick="generateReport('sales')">
+                        <i class="fas fa-chart-line"></i>
+                        <h3>Sales Report</h3>
+                        <p>Daily, weekly, monthly sales summary</p>
+                    </div>
+                    <div class="report-card" onclick="generateReport('products')">
+                        <i class="fas fa-box"></i>
+                        <h3>Product Performance</h3>
+                        <p>Top selling products, inventory status</p>
+                    </div>
+                    <div class="report-card" onclick="generateReport('customers')">
+                        <i class="fas fa-users"></i>
+                        <h3>Customer Report</h3>
+                        <p>New vs returning, lifetime value</p>
+                    </div>
+                    <div class="report-card" onclick="generateReport('delivery')">
+                        <i class="fas fa-truck"></i>
+                        <h3>Delivery Report</h3>
+                        <p>Delivery times, partner performance</p>
                     </div>
                 </div>
-                <div id="inventoryList"></div>
             </div>
 
-            <!-- Coupons Section -->
-            <div id="coupons" class="admin-section">
-                <div class="section-header">
-                    <h1>Coupon Management</h1>
-                    <button onclick="showAddCouponModal()" class="btn-primary">
-                        <i class="fas fa-plus"></i> Add Coupon
-                    </button>
+            <!-- Marketing Section -->
+            <div id="marketing" class="admin-section">
+                <h1><i class="fas fa-bullhorn"></i> Marketing Tools</h1>
+                <div class="marketing-grid">
+                    <div class="marketing-card">
+                        <h3>📧 Email Campaign</h3>
+                        <textarea id="emailContent" placeholder="Write your email content..."></textarea>
+                        <button onclick="sendEmailCampaign()" class="btn-primary">Send to All Users</button>
+                    </div>
+                    <div class="marketing-card">
+                        <h3>🏷️ Push Notification</h3>
+                        <input type="text" id="notificationTitle" placeholder="Notification Title">
+                        <textarea id="notificationBody" placeholder="Notification message..."></textarea>
+                        <button onclick="sendPushNotification()" class="btn-primary">Send Notification</button>
+                    </div>
+                    <div class="marketing-card">
+                        <h3>🎁 Bulk Coupons</h3>
+                        <input type="number" id="couponCount" placeholder="Number of coupons">
+                        <input type="number" id="couponValue" placeholder="Discount value">
+                        <select id="couponType">
+                            <option value="percentage">Percentage</option>
+                            <option value="fixed">Fixed Amount</option>
+                        </select>
+                        <button onclick="generateBulkCoupons()" class="btn-primary">Generate Coupons</button>
+                    </div>
                 </div>
-                <div id="couponsList"></div>
             </div>
 
             <!-- Settings Section -->
             <div id="settings" class="admin-section">
-                <h1>Settings</h1>
-                <div class="settings-form">
+                <h1><i class="fas fa-cog"></i> System Settings</h1>
+                <div class="settings-tabs">
+                    <button class="settings-tab active" data-tab="general">General</button>
+                    <button class="settings-tab" data-tab="delivery">Delivery</button>
+                    <button class="settings-tab" data-tab="payment">Payment</button>
+                    <button class="settings-tab" data-tab="notifications">Notifications</button>
+                </div>
+                
+                <div class="settings-panel active" id="general-settings">
                     <div class="setting-group">
-                        <label>Delivery Fee Zone 1</label>
+                        <label>Store Name</label>
+                        <input type="text" id="storeName" value="Rado ஊT">
+                    </div>
+                    <div class="setting-group">
+                        <label>Store Email</label>
+                        <input type="email" id="storeEmail" value="support@radooty.com">
+                    </div>
+                    <div class="setting-group">
+                        <label>Store Phone</label>
+                        <input type="text" id="storePhone" value="+91 9876543210">
+                    </div>
+                    <div class="setting-group">
+                        <label>Delivery Fee (Zone 1)</label>
                         <input type="number" id="zone1Fee" value="0">
                     </div>
                     <div class="setting-group">
-                        <label>Delivery Fee Zone 2</label>
+                        <label>Delivery Fee (Zone 2)</label>
                         <input type="number" id="zone2Fee" value="30">
                     </div>
                     <div class="setting-group">
-                        <label>Delivery Fee Zone 3</label>
+                        <label>Delivery Fee (Zone 3)</label>
                         <input type="number" id="zone3Fee" value="60">
                     </div>
                     <div class="setting-group">
@@ -196,11 +404,38 @@
                     </div>
                     <button onclick="saveSettings()" class="btn-primary">Save Settings</button>
                 </div>
+                
+                <div class="settings-panel" id="delivery-settings">
+                    <div class="setting-group">
+                        <label>Default Delivery Time (minutes)</label>
+                        <input type="number" id="defaultDeliveryTime" value="30">
+                    </div>
+                    <div class="setting-group">
+                        <label>Max Delivery Radius (km)</label>
+                        <input type="number" id="maxDeliveryRadius" value="30">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Logs Section -->
+            <div id="logs" class="admin-section">
+                <h1><i class="fas fa-history"></i> Activity Logs</h1>
+                <div class="filters">
+                    <input type="text" id="logSearch" placeholder="Search logs..." onkeyup="filterLogs()">
+                    <select id="logTypeFilter" onchange="filterLogs()">
+                        <option value="all">All Types</option>
+                        <option value="order">Orders</option>
+                        <option value="product">Products</option>
+                        <option value="user">Users</option>
+                        <option value="system">System</option>
+                    </select>
+                </div>
+                <div id="logsList"></div>
             </div>
         </main>
     </div>
 
-    <!-- Add Product Modal -->
+    <!-- Modals -->
     <div id="productModal" class="modal">
         <div class="modal-content">
             <h2>Add New Product</h2>
@@ -215,14 +450,13 @@
                     <option value="Bundle Deals">Bundle Deals</option>
                 </select>
                 <input type="number" placeholder="Stock" id="productStock" required>
+                <textarea placeholder="Description" id="productDescription"></textarea>
                 <button type="submit" class="btn-primary">Add Product</button>
             </form>
         </div>
     </div>
 
     <div id="toast" class="toast"></div>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="/js/admin.js"></script>
 </body>
 </html>
