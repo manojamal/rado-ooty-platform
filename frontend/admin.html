@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Rado ஊT</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="logo">
+                <span>🌿</span>
+                <span>Rado ஊT Admin</span>
+            </div>
+            <nav class="admin-nav">
+                <button class="nav-item active" data-section="dashboard">
+                    <i class="fas fa-dashboard"></i> Dashboard
+                </button>
+                <button class="nav-item" data-section="products">
+                    <i class="fas fa-box"></i> Products
+                </button>
+                <button class="nav-item" data-section="orders">
+                    <i class="fas fa-shopping-cart"></i> Orders
+                </button>
+                <button class="nav-item" data-section="users">
+                    <i class="fas fa-users"></i> Users
+                </button>
+                <button class="nav-item" data-section="analytics">
+                    <i class="fas fa-chart-line"></i> Analytics
+                </button>
+                <button class="nav-item" data-section="inventory">
+                    <i class="fas fa-warehouse"></i> Inventory
+                </button>
+                <button class="nav-item" data-section="coupons">
+                    <i class="fas fa-tag"></i> Coupons
+                </button>
+                <button class="nav-item" data-section="settings">
+                    <i class="fas fa-cog"></i> Settings
+                </button>
+            </nav>
+            <div class="admin-footer">
+                <button onclick="logout()" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="admin-section active">
+                <h1>Dashboard</h1>
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-card">
+                        <div class="stat-icon">📦</div>
+                        <div class="stat-info">
+                            <h3 id="totalOrders">0</h3>
+                            <p>Total Orders</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-info">
+                            <h3 id="totalRevenue">₹0</h3>
+                            <p>Total Revenue</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-info">
+                            <h3 id="totalUsers">0</h3>
+                            <p>Total Users</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-info">
+                            <h3 id="totalProducts">0</h3>
+                            <p>Total Products</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="charts-row">
+                    <div class="chart-card">
+                        <h3>Recent Orders</h3>
+                        <div id="recentOrdersList"></div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Top Products</h3>
+                        <div id="topProductsList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products Section -->
+            <div id="products" class="admin-section">
+                <div class="section-header">
+                    <h1>Product Management</h1>
+                    <button onclick="showAddProductModal()" class="btn-primary">
+                        <i class="fas fa-plus"></i> Add Product
+                    </button>
+                </div>
+                <div class="products-table-container">
+                    <table class="admin-table" id="productsTable">
+                        <thead>
+                            <tr><th>Image</th><th>Name</th><th>Price</th><th>Stock</th><th>Category</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="productsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Orders Section -->
+            <div id="orders" class="admin-section">
+                <div class="section-header">
+                    <h1>Order Management</h1>
+                    <select id="orderStatusFilter" onchange="filterOrders()">
+                        <option value="all">All Orders</option>
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="preparing">Preparing</option>
+                        <option value="out-for-delivery">Out for Delivery</option>
+                        <option value="delivered">Delivered</option>
+                    </select>
+                </div>
+                <div class="orders-list" id="ordersList"></div>
+            </div>
+
+            <!-- Users Section -->
+            <div id="users" class="admin-section">
+                <h1>User Management</h1>
+                <div class="users-list" id="usersList"></div>
+            </div>
+
+            <!-- Analytics Section -->
+            <div id="analytics" class="admin-section">
+                <h1>Analytics</h1>
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <h3>Sales Overview</h3>
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>Category Performance</h3>
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inventory Section -->
+            <div id="inventory" class="admin-section">
+                <h1>Inventory Management</h1>
+                <div class="inventory-stats">
+                    <div class="alert-card low-stock">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span id="lowStockCount">0</span> products low in stock
+                    </div>
+                </div>
+                <div id="inventoryList"></div>
+            </div>
+
+            <!-- Coupons Section -->
+            <div id="coupons" class="admin-section">
+                <div class="section-header">
+                    <h1>Coupon Management</h1>
+                    <button onclick="showAddCouponModal()" class="btn-primary">
+                        <i class="fas fa-plus"></i> Add Coupon
+                    </button>
+                </div>
+                <div id="couponsList"></div>
+            </div>
+
+            <!-- Settings Section -->
+            <div id="settings" class="admin-section">
+                <h1>Settings</h1>
+                <div class="settings-form">
+                    <div class="setting-group">
+                        <label>Delivery Fee Zone 1</label>
+                        <input type="number" id="zone1Fee" value="0">
+                    </div>
+                    <div class="setting-group">
+                        <label>Delivery Fee Zone 2</label>
+                        <input type="number" id="zone2Fee" value="30">
+                    </div>
+                    <div class="setting-group">
+                        <label>Delivery Fee Zone 3</label>
+                        <input type="number" id="zone3Fee" value="60">
+                    </div>
+                    <div class="setting-group">
+                        <label>Free Delivery Threshold</label>
+                        <input type="number" id="freeDeliveryThreshold" value="199">
+                    </div>
+                    <button onclick="saveSettings()" class="btn-primary">Save Settings</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Product Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <h2>Add New Product</h2>
+            <form id="productForm">
+                <input type="text" placeholder="Product Name" id="productName" required>
+                <input type="number" placeholder="Price" id="productPrice" required>
+                <input type="number" placeholder="Discount %" id="productDiscount" value="0">
+                <input type="text" placeholder="Image URL" id="productImage" required>
+                <select id="productCategory" required>
+                    <option value="Fresh Produce">Fresh Produce</option>
+                    <option value="Dairy">Dairy</option>
+                    <option value="Bundle Deals">Bundle Deals</option>
+                </select>
+                <input type="number" placeholder="Stock" id="productStock" required>
+                <button type="submit" class="btn-primary">Add Product</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/js/admin.js"></script>
+</body>
+</html>
