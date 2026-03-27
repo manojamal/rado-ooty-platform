@@ -129,4 +129,55 @@ document.getElementById('cartIcon').addEventListener('click', () => {
 });
 
 // Load products on page load
-loadProducts();
+loadProducts(); // Check if user is logged in
+let currentUser = null;
+
+async function checkAuth() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    
+    try {
+        const response = await fetch('/api/auth?action=profile', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+            currentUser = await response.json();
+            updateUserUI();
+        } else {
+            localStorage.removeItem('token');
+        }
+    } catch (error) {
+        console.error('Auth check failed:', error);
+    }
+}
+
+function updateUserUI() {
+    const cartIcon = document.querySelector('.cart-icon');
+    if (currentUser) {
+        // Add user menu to navbar
+        const navLinks = document.querySelector('.nav-links');
+        if (navLinks && !document.querySelector('.user-menu')) {
+            const userMenu = document.createElement('div');
+            userMenu.className = 'user-menu';
+            userMenu.innerHTML = `
+                <span class="user-name">👤 ${currentUser.name}</span>
+                <div class="user-dropdown">
+                    <a href="/profile.html">My Profile</a>
+                    <a href="/orders.html">My Orders</a>
+                    <a href="#" onclick="logout()">Logout</a>
+                </div>
+            `;
+            navLinks.appendChild(userMenu);
+        }
+    }
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/';
+}
+
+// Call checkAuth on page load
+checkAuth();

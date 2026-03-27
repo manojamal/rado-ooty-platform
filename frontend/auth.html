@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login / Sign Up - Rado ஊT</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .auth-container {
+            max-width: 400px;
+            margin: 4rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .auth-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #eee;
+        }
+        .auth-tab {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1rem;
+        }
+        .auth-tab.active {
+            color: #2E7D32;
+            border-bottom: 2px solid #2E7D32;
+        }
+        .auth-form {
+            display: none;
+        }
+        .auth-form.active {
+            display: block;
+        }
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background: #2E7D32;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .error {
+            color: red;
+            margin-bottom: 1rem;
+        }
+        .success {
+            color: green;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo" onclick="location.href='/'">
+                <span>🌿</span>
+                <span>Rado ஊT</span>
+                <span>Farm Fresh · Ooty Hills</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="auth-container">
+        <div class="auth-tabs">
+            <button class="auth-tab active" onclick="switchTab('login')">Login</button>
+            <button class="auth-tab" onclick="switchTab('register')">Sign Up</button>
+        </div>
+
+        <div id="loginForm" class="auth-form active">
+            <h3>Welcome Back!</h3>
+            <div id="loginError" class="error"></div>
+            <input type="email" id="loginEmail" placeholder="Email" required>
+            <input type="password" id="loginPassword" placeholder="Password" required>
+            <button onclick="login()">Login</button>
+        </div>
+
+        <div id="registerForm" class="auth-form">
+            <h3>Create Account</h3>
+            <div id="registerError" class="error"></div>
+            <div id="registerSuccess" class="success"></div>
+            <input type="text" id="regName" placeholder="Full Name" required>
+            <input type="email" id="regEmail" placeholder="Email" required>
+            <input type="tel" id="regPhone" placeholder="Phone Number">
+            <input type="password" id="regPassword" placeholder="Password" required>
+            <input type="password" id="regConfirmPassword" placeholder="Confirm Password" required>
+            <button onclick="register()">Sign Up</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '/api';
+
+        function switchTab(tab) {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+            
+            if (tab === 'login') {
+                document.querySelector('.auth-tab:first-child').classList.add('active');
+                document.getElementById('loginForm').classList.add('active');
+            } else {
+                document.querySelector('.auth-tab:last-child').classList.add('active');
+                document.getElementById('registerForm').classList.add('active');
+            }
+        }
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            errorDiv.textContent = '';
+            
+            try {
+                const response = await fetch(`${API_URL}/auth?action=login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    window.location.href = '/';
+                } else {
+                    errorDiv.textContent = data.error || 'Login failed';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Network error. Please try again.';
+            }
+        }
+
+        async function register() {
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const phone = document.getElementById('regPhone').value;
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            const errorDiv = document.getElementById('registerError');
+            const successDiv = document.getElementById('registerSuccess');
+            
+            errorDiv.textContent = '';
+            successDiv.textContent = '';
+            
+            if (password !== confirmPassword) {
+                errorDiv.textContent = 'Passwords do not match';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/auth?action=register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password, phone })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    successDiv.textContent = 'Account created! Please login.';
+                    setTimeout(() => switchTab('login'), 2000);
+                } else {
+                    errorDiv.textContent = data.error || 'Registration failed';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Network error. Please try again.';
+            }
+        }
+    </script>
+</body>
+</html>
