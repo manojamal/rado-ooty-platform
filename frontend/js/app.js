@@ -335,4 +335,291 @@ function addToCart(productId) {
                 addToCartWithPrice(product, itemPrice);
             }
         });
+} /* Gamification Widget */
+.gamification-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    padding: 1rem;
+    color: white;
+    margin: 1rem;
+}
+
+.level-badge {
+    background: rgba(255,255,255,0.2);
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.xp-bar {
+    background: rgba(255,255,255,0.2);
+    border-radius: 50px;
+    height: 20px;
+    position: relative;
+    margin: 0.5rem 0;
+    overflow: hidden;
+}
+
+.xp-progress {
+    background: #ffd700;
+    height: 100%;
+    transition: width 0.3s;
+}
+
+.xp-bar span {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.7rem;
+    color: #333;
+}
+
+.badges {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+    flex-wrap: wrap;
+}
+
+.badge {
+    background: rgba(255,255,255,0.2);
+    padding: 0.25rem 0.5rem;
+    border-radius: 50px;
+    font-size: 0.7rem;
+    cursor: help;
+}
+
+.daily-reward-btn {
+    width: 100%;
+    background: #ffd700;
+    color: #333;
+    border: none;
+    padding: 0.5rem;
+    border-radius: 6px;
+    margin-top: 0.5rem;
+    cursor: pointer;
+}
+
+/* Carbon Footprint Widget */
+.carbon-footprint {
+    background: #e8f5e9;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.offset-badge {
+    display: inline-block;
+    background: #4caf50;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 50px;
+    font-size: 0.7rem;
+    margin-top: 0.5rem;
+}
+
+/* Voice Search Button */
+.voice-search-btn {
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 0.5rem;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.voice-search-btn.listening {
+    animation: pulse 1s infinite;
+    background: #f44336;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Camera Search */
+.camera-search {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+}
+
+.camera-search input {
+    position: absolute;
+    font-size: 100px;
+    opacity: 0;
+    right: 0;
+    top: 0;
+    cursor: pointer;
+}
+
+/* Flash Sale Timer */
+.flash-sale {
+    position: relative;
+    border: 2px solid #ff4444;
+}
+
+.sale-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #ff4444;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+.countdown-timer {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ff4444;
+    margin: 1rem 0;
+}
+
+/* Dark Store Info */
+.dark-store-info {
+    background: #f5f5f5;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.store-distance {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Delivery Slots */
+.delivery-slots {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+.slot {
+    background: #e8f5e9;
+    border: 1px solid #4caf50;
+    padding: 0.5rem;
+    text-align: center;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.slot.selected {
+    background: #4caf50;
+    color: white;
+}
+
+.slot.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Route Map */
+.route-map {
+    height: 400px;
+    background: #f0f0f0;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+/* Meal Plan */
+.meal-plan {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.meal-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.meal-time {
+    font-weight: bold;
+    color: #4caf50;
+    margin-bottom: 0.5rem;
+}
+
+/* Recipe Cards */
+.recipe-card {
+    display: flex;
+    gap: 1rem;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.recipe-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+}
+
+.recipe-info {
+    flex: 1;
+    padding: 0.5rem;
+}
+
+/* Leaderboard */
+.leaderboard {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.leaderboard-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.rank {
+    width: 40px;
+    font-weight: bold;
+    color: #ffd700;
+}
+
+.top-1 .rank { font-size: 1.5rem; }
+.top-2 .rank { font-size: 1.3rem; }
+.top-3 .rank { font-size: 1.2rem; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .gamification-card {
+        margin: 0.5rem;
+    }
+    
+    .delivery-slots {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+    
+    .meal-plan {
+        grid-template-columns: 1fr;
+    }
+    
+    .recipe-card {
+        flex-direction: column;
+    }
+    
+    .recipe-image {
+        width: 100%;
+        height: 150px;
+    }
 }
