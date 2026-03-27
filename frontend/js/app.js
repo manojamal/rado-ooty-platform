@@ -180,4 +180,159 @@ function logout() {
 }
 
 // Call checkAuth on page load
-checkAuth();
+checkAuth(); // Add tracking for AI recommendations
+function trackProductView(productId) {
+    const token = localStorage.getItem('token');
+    const userId = currentUser?._id;
+    
+    fetch('/api/recommendations?type=track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, userId, sessionId: getSessionId() })
+    }).catch(console.error);
+}
+
+// Get session ID
+function getSessionId() {
+    let sessionId = sessionStorage.getItem('sessionId');
+    if (!sessionId) {
+        sessionId = 'session_' + Date.now() + '_' + Math.random();
+        sessionStorage.setItem('sessionId', sessionId);
+    }
+    return sessionId;
+}
+
+// Load recommendations
+async function loadRecommendations() {
+    const userId = currentUser?._id;
+    let url = '/api/recommendations';
+    
+    if (userId) {
+        url += '?type=personalized&userId=' + userId;
+    } else {
+        url += '?type=trending';
+    }
+    
+    try {
+        const response = await fetch(url);
+        const recommendations = await response.json();
+        renderRecommendations(recommendations);
+    } catch (error) {
+        console.error('Failed to load recommendations:', error);
+    }
+}
+
+function renderRecommendations(products) {
+    const container = document.getElementById('recommendationsGrid');
+    if (!container || !products.length) return;
+    
+    container.innerHTML = `
+        <h3>Recommended for You</h3>
+        <div class="products-grid">
+            ${products.map(product => `
+                <div class="product-card">
+                    <img src="${product.image}" alt="${product.name}">
+                    <div class="product-info">
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-price">₹${product.price}</div>
+                        <button onclick="addToCart('${product._id}')">Add to Cart</button>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+// Load flash sales
+async function loadFlashSales() {
+    try {
+        const response = await fetch('/api/flashsales');
+        const sales = await response.json();
+        renderFlashSales(sales);
+    } catch (error) {
+        console.error('Failed to load flash sales:', error);
+    }
+}
+
+function renderFlashSales(sales) {
+    const container = document.getElementById('flashSalesContainer');
+    if (!container || !sales.length) return;
+    
+    container.innerHTML = `
+        <div class="flash-sales">
+            <h2>⚡ Flash Sales</h2>
+            <div class="countdown-timer" id="flashSaleTimer"></div>
+            <div class="products-grid">
+                ${sales.map(sale => sale.products.map(product => `
+                    <div class="product-card flash-sale">
+                        <div class="sale-badge">-${product.discountPercentage}%</div>
+                        <img src="${product.productId.image}" alt="${product.productId.name}">
+                        <div class="product-info">
+                            <div class="product-name">${product.productId.name}</div>
+                            <div class="product-price">
+                                <span class="sale-price">₹${product.salePrice}</span>
+                                <span class="original-price">₹${product.originalPrice}</span>
+                            </div>
+                            <div class="stock-info">Only ${product.maxQuantity - product.soldQuantity} left!</div>
+                            <button onclick="addToCart('${product.productId._id}')">Buy Now</button>
+                        </div>
+                    </div>
+                `).join('')).join('')}
+            </div>
+        </div>
+    `;
+    
+    // Update countdown timers
+    sales.forEach(sale => updateCountdown(sale));
+}
+
+function updateCountdown(sale) {
+    const timer = document.getElementById('flashSaleTimer');
+    if (!timer) return;
+    
+    const interval = setInterval(() => {
+        const now = new Date();
+        const remaining = sale.timeRemaining;
+        
+        if (remaining <= 0) {
+            clearInterval(interval);
+            timer.innerHTML = 'Sale Ended';
+            return;
+        }
+        
+        const hours = Math.floor(remaining / 3600000);
+        const minutes = Math.floor((remaining % 3600000) / 60000);
+        const seconds = Math.floor((remaining % 60000) / 1000);
+        
+        timer.innerHTML = `Ends in: ${hours}h ${minutes}m ${seconds}s`;
+    }, 1000);
+}
+
+// Load recommendations and flash sales on page load
+document.addEventListener('DOMContentLoaded', () => {
+    loadRecommendations();
+    loadFlashSales();
+});
+
+// Add to cart with flash sale price
+function addToCart(productId) {
+    // Check if product is in flash sale
+    fetch(`/api/flashsales`)
+        .then(res => res.json())
+        .then(sales => {
+            let price = null;
+            for (const sale of sales) {
+                const product = sale.products.find(p => p.productId._id === productId);
+                if (product) {
+                    price = product.salePrice;
+                    break;
+                }
+            }
+            
+            const product = products.find(p => p._id === productId);
+            if (product) {
+                const itemPrice = price || product.price;
+                addToCartWithPrice(product, itemPrice);
+            }
+        });
+}
