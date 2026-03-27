@@ -5,8 +5,18 @@ let cachedDb = null;
 
 async function connectToDatabase() {
   if (cachedDb) return cachedDb;
-  cachedDb = await mongoose.connect(process.env.MONGODB_URI);
-  return cachedDb;
+  
+  try {
+    console.log('Connecting to MongoDB...');
+    cachedDb = await mongoose.connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000,
+    });
+    console.log('Connected successfully');
+    return cachedDb;
+  } catch (error) {
+    console.error('Connection error:', error.message);
+    throw error;
+  }
 }
 
 module.exports = async (req, res) => {
@@ -23,6 +33,7 @@ module.exports = async (req, res) => {
     const products = await Product.find({ isActive: true }).limit(50);
     res.status(200).json(products);
   } catch (error) {
+    console.error('API Error:', error.message);
     res.status(500).json({ error: error.message });
   }
 };
